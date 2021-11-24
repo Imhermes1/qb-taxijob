@@ -1,11 +1,11 @@
 Config = Config or {}
 
 Config.AllowedVehicles = {
-   [1] = {model = "taxi", label = "Standard Cab"},
+   [1] = {model = "sjbenz", label = "Standard Cab"},
 }
 
 Config.Meter = {
-    ["defaultPrice"] = 1.60
+    ["defaultPrice"] = 2.5
 }
 
 Config.Location = vector4(909.5, -177.35, 74.22, 238.5)

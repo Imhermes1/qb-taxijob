@@ -161,50 +161,43 @@ local function GetDeliveryLocation()
     end)
 end
 
--- qb-menu
+-- Old Menu Code (being removed)
 
 function TaxiGarage()
-    local vehicleMenu = {
-        {
-            header = "Taxi Vehicles",
-            isMenuHeader = true
-        }
-    }
-    for veh, v in pairs(Config.AllowedVehicles) do
-        vehicleMenu[#vehicleMenu+1] = {
-            header = v.label,
-            params = {
-                event = "qb-taxi:client:TakeVehicle",
-                args = {
-                    model = v.model
-                }
-            }
-        }
-    end
-    vehicleMenu[#vehicleMenu+1] = {
-        header = "⬅ Close Menu",
-        txt = "",
-        params = {
-            event = "qb-menu:client:closeMenu"
-        }
-    }
-    exports['qb-menu']:openMenu(vehicleMenu)
+    ped = PlayerPedId();
+    MenuTitle = "Garage"
+    ClearMenu()
+    Menu.addButton("Vehicles", "VehicleList", nil)
+    Menu.addButton("Close Menu", "closeMenuFull", nil)
 end
 
-RegisterNetEvent("qb-taxi:client:TakeVehicle", function(data)
+function VehicleList()
+    ped = PlayerPedId();
+    MenuTitle = "Vehicles:"
+    ClearMenu()
+    for k, v in pairs(Config.AllowedVehicles) do
+        Menu.addButton(Config.AllowedVehicles[k].label, "TakeVehicle", k, "Garage", " Motor: 100%", " Body: 100%", " Fuel: 100%")
+    end
+
+    Menu.addButton("Back", "TaxiGarage",nil)
+end
+
+function TakeVehicle(k)
     local coords = Config.Location
-    QBCore.Functions.SpawnVehicle(data.model, function(veh)
+    QBCore.Functions.SpawnVehicle(Config.AllowedVehicles[k].model, function(veh)
         SetVehicleNumberPlateText(veh, "TAXI"..tostring(math.random(1000, 9999)))
-        exports['LegacyFuel']:SetFuel(veh, 100.0)
+        exports['cc-fuel']:SetFuel(veh, 100.0)
         closeMenuFull()
         TaskWarpPedIntoVehicle(PlayerPedId(), veh, -1)
         TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
         SetVehicleEngineOn(veh, true, true)
     end, coords, true)
-end)
+end
 
 function closeMenuFull()
-    exports['qb-menu']:closeMenu()
+    Menu.hidden = true
+    currentGarage = nil
+    ClearMenu()
 end
 
 -- Events
@@ -413,8 +406,10 @@ CreateThread(function()
                             DrawText3D(Config.Location.x, Config.Location.y, Config.Location.z + 0.3, '[E] Job Vehicles')
                             if IsControlJustReleased(0, 38) then
                                 TaxiGarage()
+                                Menu.hidden = not Menu.hidden
                             end
                         end
+                        Menu.renderGUI()
                     end
                 end
             end
